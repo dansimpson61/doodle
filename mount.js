@@ -1,4 +1,4 @@
-import { render } from './tweak/index.js'
+import * as tweak from './tweak/index.js'
 
 export const mount = (doodle, canvas, configContainer) => {
 	const ctx = canvas.getContext('2d')	
@@ -11,23 +11,17 @@ export const mount = (doodle, canvas, configContainer) => {
 	window.addEventListener('resize', resizeCanvas)
 
 	let config
-	render(doodle.config(), configContainer, (nextConfig) => {
+	tweak.render(tweak.field(doodle.config()), configContainer, (nextConfig) => {
 		config = nextConfig
 
-		doodle.setup && doodle.setup({
-			config,
-			canvas,
-			ctx,
-		})
+		const doodleParams = () => ({ config, canvas, ctx })
+
+		// For now, call setup on every config change
+		doodle.setup && doodle.setup(doodleParams())
 
 		const loop = () => {
 			if (config !== nextConfig) return;
-
-			doodle.draw({
-				config,
-				canvas,
-				ctx
-			})
+			doodle.draw(doodleParams())
 			requestAnimationFrame(loop)
 		}
 		loop()
